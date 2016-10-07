@@ -1,5 +1,6 @@
 from gotta import gottaHand
 import threading
+import time
 
 
 def getNovel(url):
@@ -22,6 +23,7 @@ def main():
         print novelUrl
         t = threading.Thread(target=getNovel, args=(novelUrl,))
         t.start()
+        time.sleep(5)
 
 try:
     main()
