@@ -11,8 +11,14 @@ class gottaHand():
     def __init__(self, novel_url):
         self.novel_url = novel_url
         self.up = urlparse(novel_url)
-        self.regenSoup()
+        # if failed generate soup, wait 30s and retry
+        succeedFlag = self.regenSoup()
+        while succeedFlag is False:
+            time.sleep(30)
+            succeedFlag = self.regenSoup()
+
         self.novel_name = self.soup.find('title').get_text().encode('utf-8')
+        # use testInit to do the test thing
         # self.testInit()
         self.chapDict = {}
         for x in self.chapList:
@@ -86,9 +92,16 @@ class gottaHand():
         # return filepath
 
     def regenSoup(self):
-        self.response = requests.get(self.novel_url)
-        self.soup = BeautifulSoup(self.response.content, 'html.parser')
-        self.chapList = self.soup.findAll('div', {'class': 'bgg'})
+        try:
+            self.response = requests.get(self.novel_url)
+            if self.response.status_code == 200:
+                self.soup = BeautifulSoup(self.response.content, 'html.parser')
+                self.chapList = self.soup.findAll('div', {'class': 'bgg'})
+                return True
+            else:
+                return False
+        except:
+            print time.time(), 'Failed connecting to', self.novel_url
 
     def testInit(self):
         [self.chapList.pop() for x in range(3)]

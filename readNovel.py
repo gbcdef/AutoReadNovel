@@ -23,8 +23,7 @@ def main():
         t = threading.Thread(target=getNovel, args=(novelUrl,))
         t.start()
 
-main()
-# try:
-#     main()
-# except:
-#     pass
+try:
+    main()
+except:
+    pass
