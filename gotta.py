@@ -36,8 +36,9 @@ class gottaHand():
                 f.write('<!DOCTYPE html>')
                 f.write('<meta charset="UTF-8">')
 
+
     def startDaemon(self, interval=180):
-        print 'Start watching: ' + self.novel_url
+        print 'Start watching', self.novel_name
         times = 0
         while True:
             times += 1
@@ -45,7 +46,11 @@ class gottaHand():
             if self.checkNew():
                 print 'Finished checking, found new chapters.'
             else:
-                print 'No new chapters, next check: ', interval, 'seconds later'
+                if interval < 60:
+                    print 'No new chapters, next check: ', interval, 'seconds later'
+                else:
+                    print 'No new chapters, next check: ', interval/60, 'minutes later'
+
             time.sleep(interval)
 
     def checkNew(self):
