@@ -12,17 +12,15 @@ class gottaHand():
         self.novel_url = novel_url
         self.up = urlparse(novel_url)
         # if failed generate soup, wait 30s and retry
-        succeedFlag = self.regenSoup()
+        succeedFlag = self.regenChapList()
         while succeedFlag is False:
             time.sleep(30)
-            succeedFlag = self.regenSoup()
+            succeedFlag = self.regenChapList()
 
         self.novel_name = self.soup.find('title').get_text().encode('utf-8')
         # use testInit to do the test thing
         # self.testInit()
-        self.chapDict = {}
-        for x in self.chapList:
-            self.chapDict[x.get_text()] = self.up.scheme + r'://' + self.up.netloc + x.a['href']
+
 
         cwd = os.getcwd()
         self.novel_dir = os.path.join(cwd, 'novels')
@@ -36,7 +34,7 @@ class gottaHand():
 
         # init cfg path
         self.cfgPath = os.path.join(self.cfgs_dir, self.novel_name)
-        self.write_cfg(self.chapDict)
+        # self.write_cfg(self.chapDict)
         # init index.html
         self.indexPath = os.path.join(cwd, 'index.html')
         if not os.path.exists(self.indexPath):
@@ -55,12 +53,17 @@ class gottaHand():
         return j
 
     def checkNew(self):
-        succeedFlag = self.regenSoup()
+        succeedFlag = self.regenChapList()
         while succeedFlag is False:
             time.sleep(30)
-            succeedFlag = self.regenSoup()
+            succeedFlag = self.regenChapList()
 
-        self.chapDict = self.read_cfg()
+        if os.path.exists(self.cfgPath):
+            self.chapDict = self.read_cfg()
+        else:
+            self.chapDict = {}
+            for x in self.chapList:
+                self.chapDict[x.get_text()] = self.up.scheme + r'://' + self.up.netloc + x.a['href']
 
         hasNew = False
         for x in self.chapList:
@@ -73,9 +76,10 @@ class gottaHand():
                 time.sleep(2)
                 self.chapDict[title] = tempUrl
                 hasNew = True
-        
+
+        self.write_cfg(self.chapDict)
         if hasNew:
-            self.write_cfg(self.chapDict)
+            pass
         else:
             print 'No new chapters, finished check at', time.ctime()
 
@@ -106,7 +110,7 @@ class gottaHand():
                     self.novel_name + ': ' + title + '</div></a>')
         # return filepath
 
-    def regenSoup(self):
+    def regenChapList(self):
         try:
             self.response = requests.get(self.novel_url)
             if self.response.status_code == 200:

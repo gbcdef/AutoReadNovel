@@ -1,11 +1,9 @@
 from gotta import gottaHand
 
 def getNovel(url):
-    # try:
     h = gottaHand(url)
     h.checkNew()
-    # except:
-        # print 'wrong in getNovel'
+
 
 
 def test():
@@ -20,9 +18,9 @@ def main():
         getNovel(n)
 
 
-# try:
-#     main()
-# except:
-#     pass
+try:
+    main()
+except:
+    pass
 
-test()
+# test()
