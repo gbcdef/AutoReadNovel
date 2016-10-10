@@ -2,6 +2,7 @@
 novels/
 index.html
 log
+cfgs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

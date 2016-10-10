@@ -4,7 +4,7 @@ import re
 from bs4 import BeautifulSoup
 import os
 from urlparse import urlparse
-
+import json
 
 class gottaHand():
 
@@ -22,52 +22,63 @@ class gottaHand():
         # self.testInit()
         self.chapDict = {}
         for x in self.chapList:
-            self.chapDict[x.get_text()] = self.up.scheme + r'://' + \
-                self.up.netloc + x.a['href']
+            self.chapDict[x.get_text()] = self.up.scheme + r'://' + self.up.netloc + x.a['href']
 
         cwd = os.getcwd()
         self.novel_dir = os.path.join(cwd, 'novels')
         if not os.path.exists(self.novel_dir):
             os.makedirs(self.novel_dir)
 
-        self.indexPath = os.path.join(os.getcwd(), 'index.html')
+        # init cfgs dir
+        self.cfgs_dir = os.path.join(os.getcwd(),'cfgs')
+        if not os.path.exists(self.cfgs_dir):
+            os.makedirs(self.cfgs_dir)
+
+        # init cfg path
+        self.cfgPath = os.path.join(self.cfgs_dir, self.novel_name)
+        self.write_cfg(self.chapDict)
+        # init index.html
+        self.indexPath = os.path.join(cwd, 'index.html')
         if not os.path.exists(self.indexPath):
             with open(self.indexPath, 'w') as f:
                 f.write('<!DOCTYPE html>')
                 f.write('<meta charset="UTF-8">')
 
+    def write_cfg(self, arg):
+        with open(self.cfgPath, 'w') as f:
+            json.dump(self.chapDict, f)
 
-    def startDaemon(self, interval=180):
-        print 'Start watching', self.novel_name
-        times = 0
-        while True:
-            times += 1
-            print 'Checking', str(times), 'times:', self.novel_name
-            if self.checkNew():
-                print 'Finished checking, found new chapters.'
-            else:
-                if interval < 60:
-                    print 'No new chapters, next check: ', interval, 'seconds later'
-                else:
-                    print 'No new chapters, next check: ', interval/60, 'minutes later'
+    def read_cfg(self):
+        with open(self.cfgPath, 'r') as f:
+            j = json.load(f)
 
-            time.sleep(interval)
+        return j
 
     def checkNew(self):
-        self.regenSoup()
+        succeedFlag = self.regenSoup()
+        while succeedFlag is False:
+            time.sleep(30)
+            succeedFlag = self.regenSoup()
+
+        self.chapDict = self.read_cfg()
+
         hasNew = False
         for x in self.chapList:
             title = x.get_text()
             if title not in self.chapDict:
-                print 'Has new chapter', title.encode('utf-8')
+                print 'Has new chapter', title
                 tempUrl = self.up.scheme + r'://' + self.up.netloc + x.a['href']
                 self.getChapContent(tempUrl)
                 # rest for 2 seconds in case get same unix timestamp
                 time.sleep(2)
                 self.chapDict[title] = tempUrl
                 hasNew = True
+        
+        if hasNew:
+            self.write_cfg(self.chapDict)
+        else:
+            print 'No new chapters, finished check at', time.ctime()
 
-        return hasNew
 
     def getChapContent(self, tempUrl):
         r = requests.get(tempUrl)
@@ -89,8 +100,7 @@ class gottaHand():
             f.write('</article></body>')
 
         shortPath = os.path.basename(filepath)
-        with open(self.indexPath, 'r+w') as f:
-            f.read()
+        with open(self.indexPath, 'a') as f:
             f.write('\n')
             f.write('<a href=\'novels\\' + shortPath + '\'><div>' +
                     self.novel_name + ': ' + title + '</div></a>')
@@ -106,7 +116,7 @@ class gottaHand():
             else:
                 return False
         except:
-            print time.time(), 'Failed connecting to', self.novel_url
+            return False
 
     def testInit(self):
         [self.chapList.pop() for x in range(3)]
