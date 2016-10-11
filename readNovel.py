@@ -1,5 +1,5 @@
 from gotta import gottaHand
-import sys
+import sys, os
 
 def getNovel(url, dir):
     h = gottaHand(url, dir)
@@ -16,17 +16,13 @@ def main():
 		print 'specify working directory'
 		return
 	else:
-	    with open('config', 'r') as f:
+	    dir = sys.argv[1]
+
+	    with open(os.path.join(dir,'config'), 'r') as f:
 	        novelUrlList = f.readlines()
 
-	    dir = sys.argv[1]
 	    for n in novelUrlList:
 	        getNovel(n, dir)
 
 
-try:
-    main()
-except:
-    pass
-
-# test()
+main()
