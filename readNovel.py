@@ -1,7 +1,8 @@
 from gotta import gottaHand
+import sys
 
-def getNovel(url):
-    h = gottaHand(url)
+def getNovel(url, dir):
+    h = gottaHand(url, dir)
     h.checkNew()
 
 
@@ -11,11 +12,16 @@ def test():
 
 
 def main():
-    with open('config', 'r') as f:
-        novelUrlList = f.readlines()
+	if len(sys.argv) < 2:
+		print 'specify working directory'
+		return
+	else:
+	    with open('config', 'r') as f:
+	        novelUrlList = f.readlines()
 
-    for n in novelUrlList:
-        getNovel(n)
+	    dir = sys.argv[1]
+	    for n in novelUrlList:
+	        getNovel(n, dir)
 
 
 try:

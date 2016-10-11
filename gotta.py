@@ -8,7 +8,7 @@ import json
 
 class gottaHand():
 
-    def __init__(self, novel_url):
+    def __init__(self, novel_url, cwd):
         self.novel_url = novel_url
         self.up = urlparse(novel_url)
         # if failed generate soup, wait 30s and retry
@@ -22,13 +22,13 @@ class gottaHand():
         # self.testInit()
 
 
-        cwd = os.getcwd()
+        # cwd = os.getcwd()
         self.novel_dir = os.path.join(cwd, 'novels')
         if not os.path.exists(self.novel_dir):
             os.makedirs(self.novel_dir)
 
         # init cfgs dir
-        self.cfgs_dir = os.path.join(os.getcwd(),'cfgs')
+        self.cfgs_dir = os.path.join(cwd,'cfgs')
         if not os.path.exists(self.cfgs_dir):
             os.makedirs(self.cfgs_dir)
 
