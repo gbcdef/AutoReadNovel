@@ -39,8 +39,13 @@ class gottaHand():
         self.indexPath = os.path.join(cwd, 'index.html')
         if not os.path.exists(self.indexPath):
             with open(self.indexPath, 'w') as f:
-                f.write('<!DOCTYPE html>')
-                f.write('<meta charset="UTF-8">')
+                f.write(r'<!DOCTYPE html>')
+                f.write(r'<head>')
+                f.write(r'<meta charset="UTF-8">')
+                f.write(r'<link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">')
+                f.write(r'</head>')
+                f.write(r'<html>')
+                f.write(r'<div class="container-fluid">')
 
     def write_cfg(self, arg):
         with open(self.cfgPath, 'w') as f:
