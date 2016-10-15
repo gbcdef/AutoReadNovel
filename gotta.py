@@ -92,7 +92,7 @@ class gottaHand():
     def getChapContent(self, tempUrl):
         r = requests.get(tempUrl)
         soup = BeautifulSoup(r.content, 'html.parser')
-        title = soup.find(id='nr_title').get_text().encode('utf-8')
+        title = soup.find(class_='nr_title').get_text().encode('utf-8')
         content = soup.find(id='nr1').prettify().encode('utf-8')
         content = re.sub('\n+', '\n', content)
         content = re.sub(' +', ' ', content)
