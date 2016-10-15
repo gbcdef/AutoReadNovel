@@ -18,11 +18,6 @@ class gottaHand():
             succeedFlag = self.regenChapList()
 
         self.novel_name = self.soup.find('title').get_text().encode('utf-8')
-        # use testInit to do the test thing
-        # self.testInit()
-
-
-        # cwd = os.getcwd()
         self.novel_dir = os.path.join(cwd, 'novels')
         if not os.path.exists(self.novel_dir):
             os.makedirs(self.novel_dir)
@@ -42,10 +37,15 @@ class gottaHand():
                 f.write(r'<!DOCTYPE html>')
                 f.write(r'<head>')
                 f.write(r'<meta charset="UTF-8">')
+                f.write(r'<meta name="viewport" content="width=device-width, initial-scale=1">')
+                f.write(r'<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">')
                 f.write(r'<link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">')
                 f.write(r'</head>')
                 f.write(r'<html>')
                 f.write(r'<div class="container-fluid">')
+                f.write(r'<div class="row">')
+                f.write(r'<div class="col-md-12">')
+                f.write(r'<ul>')
 
     def write_cfg(self, arg):
         with open(self.cfgPath, 'w') as f:
@@ -105,14 +105,14 @@ class gottaHand():
             f.write('<body><article>')
             f.write('<h1>' + title + '</h1>')
             f.write('<p>' + time.ctime() + '</p>')
-            f.write(content)
+            f.write('<p>' + content + '</p>')
             f.write('</article></body>')
 
         shortPath = os.path.basename(filepath)
         with open(self.indexPath, 'a') as f:
             f.write('\n')
-            f.write('<a href=\'novels\\' + shortPath + '\'><div>' +
-                    self.novel_name + ': ' + title + '</div></a>')
+            f.write('<li><a href=\'novels\\' + shortPath + '\'>' +
+                    self.novel_name + ': ' + title + '</a></li>')
         # return filepath
 
     def regenChapList(self):
@@ -126,6 +126,3 @@ class gottaHand():
                 return False
         except:
             return False
-
-    def testInit(self):
-        [self.chapList.pop() for x in range(3)]

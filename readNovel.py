@@ -1,28 +1,26 @@
 from gotta import gottaHand
 import sys, os
 
-def getNovel(url, dir):
-    h = gottaHand(url, dir)
+
+def getNovel(url, path):
+    h = gottaHand(url, path)
     h.checkNew()
 
 
-
 def test():
-    getNovel('http://m.biquge.la/booklist/176.html')
+    getNovel('http://m.biquge.la/booklist/176.html', os.getcwd())
 
 
 def main():
-	if len(sys.argv) < 2:
-		print 'specify working directory'
-		return
-	else:
-	    dir = sys.argv[1]
+    if len(sys.argv) < 2:
+        path = os.getcwd()
+    else:
+        path = sys.argv[1]
 
-	    with open(os.path.join(dir,'config'), 'r') as f:
-	        novelUrlList = f.readlines()
+    with open(os.path.join(path, 'config'), 'r') as f:
+        novelUrlList = f.readlines()
 
-	    for n in novelUrlList:
-	        getNovel(n, dir)
-
+    for n in novelUrlList:
+        getNovel(n,path)
 
 main()
