@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 import os
 from urlparse import urlparse
 import json
+import base64
 
 class gottaHand():
 
@@ -28,7 +29,7 @@ class gottaHand():
             os.makedirs(self.cfgs_dir)
 
         # init cfg path
-        self.cfgPath = os.path.join(self.cfgs_dir, self.novel_name)
+        self.cfgPath = os.path.join(self.cfgs_dir, base64.urlsafe_b64encode(self.novel_name))
         # self.write_cfg(self.chapDict)
         # init index.html
         self.indexPath = os.path.join(cwd, 'index.html')
@@ -68,31 +69,37 @@ class gottaHand():
         else:
             self.chapDict = {}
             for x in self.chapList:
-                self.chapDict[x.get_text()] = self.up.scheme + r'://' + self.up.netloc + x.a['href']
+                self.chapDict[x.get_text().encode('utf-8')] = self.up.scheme + r'://' + self.up.netloc + x.a['href']
 
         hasNew = False
         for x in self.chapList:
             title = x.get_text()
             if title not in self.chapDict:
                 print 'Has new chapter', title
+                hasNew = True
                 tempUrl = self.up.scheme + r'://' + self.up.netloc + x.a['href']
+                self.chapDict[title] = tempUrl
                 self.getChapContent(tempUrl)
+                self.write_cfg(self.chapDict)
                 # rest for 2 seconds in case get same unix timestamp
                 time.sleep(2)
-                self.chapDict[title] = tempUrl
-                hasNew = True
 
-        self.write_cfg(self.chapDict)
-        if hasNew:
-            pass
-        else:
+        if not hasNew:
             print 'No new chapters, finished check at', time.ctime()
 
 
     def getChapContent(self, tempUrl):
-        r = requests.get(tempUrl)
+        succeedFlag = False
+        while succeedFlag is False:
+            time.sleep(5)
+            r = requests.get(tempUrl)
+            if r.status_code == 200:
+                succeedFlag = True
+            else:
+                print 'Failed getting chapter contents, retry 5s later.'
+
         soup = BeautifulSoup(r.content, 'html.parser')
-        title = soup.find(class_='nr_title').get_text().encode('utf-8')
+        title = soup.find(id='nr_title').get_text().encode('utf-8')
         content = soup.find(id='nr1').prettify().encode('utf-8')
         content = re.sub('\n+', '\n', content)
         content = re.sub(' +', ' ', content)
@@ -113,16 +120,12 @@ class gottaHand():
             f.write('\n')
             f.write('<li><a href=\'novels\\' + shortPath + '\'>' +
                     self.novel_name + ': ' + title + '</a></li>')
-        # return filepath
 
     def regenChapList(self):
-        try:
-            self.response = requests.get(self.novel_url)
-            if self.response.status_code == 200:
-                self.soup = BeautifulSoup(self.response.content, 'html.parser')
-                self.chapList = self.soup.findAll('div', {'class': 'bgg'})
-                return True
-            else:
-                return False
-        except:
+        self.response = requests.get(self.novel_url)
+        if self.response.status_code == 200:
+            self.soup = BeautifulSoup(self.response.content, 'html.parser')
+            self.chapList = self.soup.findAll('div', {'class': 'bgg'})
+            return True
+        else:
             return False
